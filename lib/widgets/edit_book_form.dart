@@ -1,28 +1,41 @@
 import 'package:flutter/material.dart';
+import '../models/book.dart';
 
-class BookForm extends StatefulWidget {
-  final Function(String title, String author) onAdd; // Callback для добавления книги
+class EditBookForm extends StatefulWidget {
+  final Book initialBook; // Книга, которую редактируем
+  final Function(Book oldBook, String newTitle, String newAuthor) onUpdate;
 
-  const BookForm({super.key, required this.onAdd});
+  const EditBookForm({
+    super.key,
+    required this.initialBook,
+    required this.onUpdate,
+  });
 
   @override
-  State<BookForm> createState() => _BookFormState();
+  State<EditBookForm> createState() => _EditBookFormState();
 }
 
-class _BookFormState extends State<BookForm> {
-  final _titleController = TextEditingController();
-  final _authorController = TextEditingController();
-  final _formKey = GlobalKey<FormState>(); // Ключ для валидации формы
+class _EditBookFormState extends State<EditBookForm> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _titleController;
+  late TextEditingController _authorController;
 
-  // 🔑 ЛОГИКА: Обработка добавления
+  @override
+  void initState() {
+    super.initState();
+    // 🔑 Предзаполнение полей текущими значениями
+    _titleController = TextEditingController(text: widget.initialBook.title);
+    _authorController = TextEditingController(text: widget.initialBook.author);
+  }
+
+  // 🔑 ЛОГИКА: Обработка обновления
   void _submitData() {
-    // Проверка валидации формы
     if (_formKey.currentState!.validate()) {
-      final enteredTitle = _titleController.text.trim();
-      final enteredAuthor = _authorController.text.trim();
+      final newTitle = _titleController.text.trim();
+      final newAuthor = _authorController.text.trim();
 
-      // Вызываем переданный callback, который обновит состояние в HomePage
-      widget.onAdd(enteredTitle, enteredAuthor);
+      // Вызываем переданный callback для обновления
+      widget.onUpdate(widget.initialBook, newTitle, newAuthor);
 
       // Закрываем модальное окно
       Navigator.of(context).pop();
@@ -38,11 +51,9 @@ class _BookFormState extends State<BookForm> {
 
   @override
   Widget build(BuildContext context) {
-    // Получаем текущую цветовую схему
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      // 🔑 Координальное изменение дизайна: Модальное окно с закругленными углами
       decoration: BoxDecoration(
         color: colorScheme.background,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25.0)),
@@ -51,7 +62,6 @@ class _BookFormState extends State<BookForm> {
         top: 20,
         left: 20,
         right: 20,
-        // Адаптация под клавиатуру
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
       child: Form(
@@ -62,7 +72,7 @@ class _BookFormState extends State<BookForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Добавить новую книгу',
+                'Редактировать книгу',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -72,7 +82,7 @@ class _BookFormState extends State<BookForm> {
               ),
               const SizedBox(height: 30),
 
-              // 🔑 Новое поле ввода (Название)
+              // Поле ввода (Название)
               TextFormField(
                 controller: _titleController,
                 style: TextStyle(color: colorScheme.onSurface),
@@ -80,11 +90,7 @@ class _BookFormState extends State<BookForm> {
                   labelText: 'Название книги',
                   labelStyle: TextStyle(color: colorScheme.secondary),
                   prefixIcon: Icon(Icons.title, color: colorScheme.secondary.withOpacity(0.7)),
-                  // Улучшенный дизайн границы
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                    borderSide: BorderSide(color: colorScheme.primary),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0)),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15.0),
                     borderSide: BorderSide(color: colorScheme.secondary, width: 2.0),
@@ -96,11 +102,10 @@ class _BookFormState extends State<BookForm> {
                   }
                   return null;
                 },
-                onFieldSubmitted: (_) => _submitData(),
               ),
               const SizedBox(height: 16),
 
-              // 🔑 Новое поле ввода (Автор)
+              // Поле ввода (Автор)
               TextFormField(
                 controller: _authorController,
                 style: TextStyle(color: colorScheme.onSurface),
@@ -108,10 +113,7 @@ class _BookFormState extends State<BookForm> {
                   labelText: 'Автор',
                   labelStyle: TextStyle(color: colorScheme.secondary),
                   prefixIcon: Icon(Icons.person, color: colorScheme.secondary.withOpacity(0.7)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                    borderSide: BorderSide(color: colorScheme.primary),
-                  ),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.0)),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15.0),
                     borderSide: BorderSide(color: colorScheme.secondary, width: 2.0),
@@ -123,36 +125,32 @@ class _BookFormState extends State<BookForm> {
                   }
                   return null;
                 },
-                onFieldSubmitted: (_) => _submitData(),
               ),
               const SizedBox(height: 30),
 
-              // 🔑 Тройная кнопка "Добавить"
+              // Кнопка "Сохранить изменения"
               ElevatedButton(
                 onPressed: _submitData,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 15),
-                  backgroundColor: colorScheme.secondary, // Используем акцентный цвет
-                  foregroundColor: colorScheme.onSecondary, // Цвет текста
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                   elevation: 5,
                 ),
                 child: const Text(
-                  'Добавить в Вишлист',
+                  'Сохранить изменения',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              // Кнопка "Отмена" для закрытия
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: Text(
                   'Отмена',
-                  style: TextStyle(color: colorScheme.primary, fontSize: 16),
+                  style: TextStyle(color: colorScheme.secondary, fontSize: 16),
                 ),
               ),
             ],
