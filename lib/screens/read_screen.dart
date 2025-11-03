@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import '../models/book.dart';
 
 class ReadScreen extends StatelessWidget {
-  const ReadScreen({super.key});
+  final List<Book> books;
 
-  // Фиктивные данные для вёрстки (ЛР4)
-  final List<Map<String, String>> mockReadBooks = const [
-    {'title': 'Гордость и предубеждение', 'author': 'Джейн Остин'},
-    {'title': '451 градус по Фаренгейту', 'author': 'Рэй Брэдбери'},
-  ];
+  const ReadScreen({
+    super.key,
+    required this.books,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -17,14 +17,15 @@ class ReadScreen extends StatelessWidget {
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
       ),
-      body: ListView.builder(
-        itemCount: mockReadBooks.length,
+      body: books.isEmpty
+          ? const Center(child: Text('Вы пока ничего не прочитали!'))
+          : ListView.builder(
+        itemCount: books.length,
         itemBuilder: (context, index) {
-          final book = mockReadBooks[index];
+          final book = books[index];
           return ListTile(
-            title: Text(book['title']!),
-            subtitle: Text(book['author']!),
-            // Можно добавить иконку, что книга прочитана
+            title: Text(book.title),
+            subtitle: Text(book.author),
             trailing: const Icon(Icons.menu_book, color: Colors.indigo),
           );
         },
