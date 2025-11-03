@@ -3,8 +3,8 @@ import '../models/book.dart';
 
 class WishlistScreen extends StatelessWidget {
   final List<Book> books;
-  final Function(Book) onMarkAsRead; // Callback для отметки "Прочитано"
-  final VoidCallback onAddTapped; // Callback для вызова модального окна
+  final Function(Book) onMarkAsRead;
+  final VoidCallback onAddTapped;
 
   const WishlistScreen({
     super.key,
@@ -29,20 +29,22 @@ class WishlistScreen extends StatelessWidget {
           final book = books[index];
           return ListTile(
             title: Text(book.title),
-            subtitle: Text(book.author),
+            subtitle: Text(
+              // Отображаем автора и описание, если оно есть
+              '${book.author}${book.description != null ? '\nОписание: ${book.description!}' : ''}',
+              maxLines: book.description != null ? 3 : 1, // Позволяем субтитрам занимать больше места
+              overflow: TextOverflow.ellipsis,
+            ),
+            isThreeLine: book.description != null, // Делаем его многострочным
             trailing: IconButton(
               icon: const Icon(Icons.check_circle_outline, color: Colors.green),
-              // !!! ЛОГИКА: Вызываем переданную функцию при нажатии !!!
               onPressed: () => onMarkAsRead(book),
             ),
-            onTap: () {
-              // В ЛР6 здесь можно будет показать детали
-            },
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: onAddTapped, // !!! ЛОГИКА: Вызываем callback для показа формы !!!
+        onPressed: onAddTapped,
         backgroundColor: Colors.pinkAccent,
         child: const Icon(Icons.add, color: Colors.white),
       ),
