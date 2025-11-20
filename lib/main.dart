@@ -30,7 +30,7 @@ class MainApp extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return MaterialApp(
-      title: 'Book Tracker',
+      title: 'BookWishlist',
       debugShowCheckedModeBanner: false,
 
       theme: ThemeProvider.lightTheme,
